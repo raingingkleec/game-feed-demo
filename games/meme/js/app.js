@@ -57,10 +57,15 @@ try {
     ["stage-main", safeAsset(contentPack.stage.image)],
   ];
   let loaded = 0;
-  await Promise.all(jobs.map(([name,src]) => loadImage(name,src).then(() => {
-    loaded += 1;
-    ui.progress.textContent = `${Math.round(loaded / jobs.length * 100)}%`;
-  })));
+  let nextImage = 0;
+  await Promise.all(Array.from({ length: Math.min(6, jobs.length) }, async () => {
+    while (nextImage < jobs.length) {
+      const [name, src] = jobs[nextImage++];
+      await loadImage(name, src);
+      loaded += 1;
+      ui.progress.textContent = `${Math.round(loaded / jobs.length * 100)}%`;
+    }
+  }));
   ui.loading.hidden = true;
   ui.start.hidden = false;
 } catch (error) {
