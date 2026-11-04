@@ -33,12 +33,13 @@ jobs:
                   for name in z.namelist():
                       assert (target / name).resolve().is_relative_to(target), name
                   z.extractall(target)
-          # Compatibility for the first browser-uploaded archives: add missing ES modules.
-          for module in Path('games').rglob('*.mjs'):
+          # Tracked runtime adapters supersede the first browser-uploaded archive copies.
+          for module in Path('games').rglob('*'):
+              if module.suffix not in ('.js', '.mjs'):
+                  continue
               destination = target / module
-              if not destination.exists():
-                  destination.parent.mkdir(parents=True, exist_ok=True)
-                  copyfile(module, destination)
+              destination.parent.mkdir(parents=True, exist_ok=True)
+              copyfile(module, destination)
           for fighter in ('paw', 'meme', 'eva'):
               assert (target / 'games' / fighter / 'js' / 'engine.mjs').is_file()
           assert (target / 'index.html').is_file()
