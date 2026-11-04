@@ -24,6 +24,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           from zipfile import ZipFile
+          from shutil import copyfile
           target = Path('public').resolve()
           archives = sorted(Path('.').glob('site-part-*.zip'))
           assert len(archives) == 5, 'Waiting for all five runtime archives'
@@ -32,6 +33,14 @@ jobs:
                   for name in z.namelist():
                       assert (target / name).resolve().is_relative_to(target), name
                   z.extractall(target)
+          # Compatibility for the first browser-uploaded archives: add missing ES modules.
+          for module in Path('games').rglob('*.mjs'):
+              destination = target / module
+              if not destination.exists():
+                  destination.parent.mkdir(parents=True, exist_ok=True)
+                  copyfile(module, destination)
+          for fighter in ('paw', 'meme', 'eva'):
+              assert (target / 'games' / fighter / 'js' / 'engine.mjs').is_file()
           assert (target / 'index.html').is_file()
           (target / '.nojekyll').touch()
           PY
