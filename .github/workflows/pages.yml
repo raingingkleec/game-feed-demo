@@ -24,7 +24,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           from zipfile import ZipFile
-          from shutil import copyfile
+          from shutil import copyfile, copytree
           target = Path('public').resolve()
           archives = sorted(Path('.').glob('site-part-*.zip'))
           assert len(archives) == 5, 'Waiting for all five runtime archives'
@@ -42,6 +42,8 @@ jobs:
               copyfile(module, destination)
           for fighter in ('paw', 'meme', 'eva'):
               assert (target / 'games' / fighter / 'js' / 'engine.mjs').is_file()
+          if Path('promo').is_dir():
+              copytree('promo', target / 'promo', dirs_exist_ok=True)
           assert (target / 'index.html').is_file()
           (target / '.nojekyll').touch()
           PY
