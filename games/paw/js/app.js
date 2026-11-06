@@ -1,6 +1,7 @@
 import { createGame, resetGame, setDirection, setButton, stepGame, getDebugGeometry, WORLD, MOVES } from "./engine.mjs";
+import { createFeedPortrait } from "./feed-portrait.mjs?v=immersive-1";
 
-const canvas = document.querySelector("#game"), ctx = canvas.getContext("2d", { alpha: false });
+const canvas = document.querySelector("#game"); let ctx = canvas.getContext("2d", { alpha: false });
 const $ = selector => document.querySelector(selector);
 const pageParams = new URLSearchParams(location.search);
 const ui = {
@@ -77,6 +78,9 @@ try {
 }
 
 let game = createGame(), last = performance.now(), accumulator = 0, announcedEnd = false;
+let feedPaused=false;
+window.addEventListener("message",e=>{if(e.source===parent&&e.origin===location.origin&&pageParams.get("feed")==="preview"){if(e.data?.type==="feed-pause")feedPaused=true;if(e.data?.type==="feed-resume")feedPaused=false;}});
+const feedPortrait=pageParams.get("feed")==="preview"&&pageParams.get("view")==="portrait"?createFeedPortrait({stage:images["stage-main"],ground:WORLD.ground,context:()=>ctx,useContext:value=>ctx=value,getGame:()=>game,drawActors:()=>{drawFighter(game.player);drawFighter(game.enemy);drawSpecialEffects(0);drawParticles(0);}}):null;
 const FIXED = 1 / 120, particles = [], specialEffects = [], pointerButtons = new Map(), keys = new Set(), finishTimers = [];
 const hitFlashUntil = { cat:0, dog:0 };
 let cameraKick = 0, superFreezePulse = 0;
@@ -219,13 +223,13 @@ function updateUI(){ui.timer.textContent=String(Math.ceil(game.time)).padStart(2
 function finishRound(){
   if(announcedEnd)return;announcedEnd=true;releaseAll();clearFinishSequence();
   const title=game.winner==="cat"?`${ui.playerName.textContent} WINS`:game.winner==="dog"?`${ui.enemyName.textContent} WINS`:"DRAW";
-  if(game.winner==="cat")records.wins+=1;records.bestCombo=Math.max(records.bestCombo,game.player.maxCombo);localStorage.setItem("paw-arena-v1",JSON.stringify(records));
+  if(pageParams.get("feed")!=="preview"){if(game.winner==="cat")records.wins+=1;records.bestCombo=Math.max(records.bestCombo,game.player.maxCombo);localStorage.setItem("paw-arena-v1",JSON.stringify(records));}
   ui.finishKo.textContent=game.reason==="double_ko"?"DOUBLE K.O.":game.reason==="ko"?"K.O.":"TIME UP";ui.finishWinner.textContent=title;ui.finish.hidden=false;ui.finish.classList.add("ko-phase");
   finishTimers.push(window.setTimeout(()=>{ui.finish.classList.remove("ko-phase");ui.finish.classList.add("winner-phase");},1120));
   finishTimers.push(window.setTimeout(()=>{ui.finish.hidden=true;ui.finish.className="finish-cinematic";},3500));
   finishTimers.push(window.setTimeout(()=>{ui.start.textContent=contentPack.story?.rematchText||"再战一局";ui.start.classList.add("rematch");ui.start.hidden=false;},3850));
 }
-function frame(now){const raw=Math.min(.05,(now-last)/1000);last=now;accumulator+=raw;while(accumulator>=FIXED){stepGame(game,FIXED);for(const event of game.events){if(["hit","guard","perfect-guard"].includes(event.type))spawnImpact(event);if(event.type==="hit"&&event.antiAir)showAnnounce("ANTI-AIR",360);else if(event.type==="hit"&&event.counter)showAnnounce("COUNTER",360);else if(event.type==="hit"&&event.punish)showAnnounce("PUNISH",360);if(event.type==="special-hit"){spawnImpact(event);spawnSpecialEffect(event);}if(event.type==="special-lock"){cameraKick=Math.max(cameraKick,.22);}if(event.type==="special-cinematic-start"){cameraKick=Math.max(cameraKick,.7);superFreezePulse=.3;sound.tone(event.attacker==="cat"?330:170,.18,"sawtooth",.05);}if(event.type==="special-whiff"&&event.attacker==="cat")showAnnounce("跳跃闪避",360);if(event.type==="special-whiff"&&event.attacker==="dog")showAnnounce("下蹲闪避",360);}accumulator-=FIXED;}cameraKick=Math.max(0,cameraKick-raw*4.8);superFreezePulse=Math.max(0,superFreezePulse-raw);ctx.save();const zoom=1+cameraKick*.014;ctx.translate(480,270);ctx.scale(zoom,zoom);ctx.translate(-480,-270);if(game.shake>0){const strength=Math.min(1,game.shake/.18);ctx.translate((Math.random()-.5)*10*strength,(Math.random()-.5)*7*strength);}drawBackground(game.elapsed);const specialActive=game.player.state==="special"||game.enemy.state==="special";if(specialActive){ctx.fillStyle=game.specialLock?"rgba(4,6,18,.38)":"rgba(6,9,25,.26)";ctx.fillRect(0,0,960,540);}if(game.specialLock){ctx.fillStyle="rgba(0,0,0,.42)";ctx.fillRect(0,0,960,18);ctx.fillRect(0,522,960,18);}drawFighter(game.player);drawFighter(game.enemy);drawSpecialEffects(raw);drawParticles(raw);if(superFreezePulse>0){ctx.fillStyle=`rgba(220,238,255,${superFreezePulse*.48})`;ctx.fillRect(0,0,960,540);}if(game.debug){drawDebug(game.player);drawDebug(game.enemy);}ctx.restore();updateUI();if(game.phase==="round_end")finishRound();requestAnimationFrame(frame);}
+function frame(now){const raw=feedPaused?0:Math.min(.05,(now-last)/1000);last=now;accumulator+=raw;while(accumulator>=FIXED){stepGame(game,FIXED);for(const event of game.events){if(["hit","guard","perfect-guard"].includes(event.type))spawnImpact(event);if(event.type==="hit"&&event.antiAir)showAnnounce("ANTI-AIR",360);else if(event.type==="hit"&&event.counter)showAnnounce("COUNTER",360);else if(event.type==="hit"&&event.punish)showAnnounce("PUNISH",360);if(event.type==="special-hit"){spawnImpact(event);spawnSpecialEffect(event);}if(event.type==="special-lock"){cameraKick=Math.max(cameraKick,.22);}if(event.type==="special-cinematic-start"){cameraKick=Math.max(cameraKick,.7);superFreezePulse=.3;sound.tone(event.attacker==="cat"?330:170,.18,"sawtooth",.05);}if(event.type==="special-whiff"&&event.attacker==="cat")showAnnounce("跳跃闪避",360);if(event.type==="special-whiff"&&event.attacker==="dog")showAnnounce("下蹲闪避",360);}accumulator-=FIXED;}cameraKick=Math.max(0,cameraKick-raw*4.8);superFreezePulse=Math.max(0,superFreezePulse-raw);ctx.save();const zoom=1+cameraKick*.014;ctx.translate(480,270);ctx.scale(zoom,zoom);ctx.translate(-480,-270);if(game.shake>0){const strength=Math.min(1,game.shake/.18);ctx.translate((Math.random()-.5)*10*strength,(Math.random()-.5)*7*strength);}drawBackground(game.elapsed);const specialActive=game.player.state==="special"||game.enemy.state==="special";if(specialActive){ctx.fillStyle=game.specialLock?"rgba(4,6,18,.38)":"rgba(6,9,25,.26)";ctx.fillRect(0,0,960,540);}if(game.specialLock){ctx.fillStyle="rgba(0,0,0,.42)";ctx.fillRect(0,0,960,18);ctx.fillRect(0,522,960,18);}drawFighter(game.player);drawFighter(game.enemy);drawSpecialEffects(raw);drawParticles(raw);if(superFreezePulse>0){ctx.fillStyle=`rgba(220,238,255,${superFreezePulse*.48})`;ctx.fillRect(0,0,960,540);}if(game.debug){drawDebug(game.player);drawDebug(game.enemy);}ctx.restore();feedPortrait?.(raw);updateUI();if(game.phase==="round_end")finishRound();requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 
 // FEED_DEMO_BRIDGE
@@ -239,6 +243,7 @@ if(pageParams.get('feed')==='preview'){
  const specialClip=pageParams.get('clip')==='special';
  let restartAt=0;
  setInterval(()=>{
+  if(feedPaused)return;
   if(game.phase==='round_end'){
    if(!restartAt)restartAt=performance.now()+2600;
    if(performance.now()>restartAt){begin();game.player.energy=100;game.enemy.energy=100;restartAt=0;}
