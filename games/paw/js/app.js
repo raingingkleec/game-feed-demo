@@ -70,6 +70,7 @@ try {
   ui.start.hidden = false;
 } catch (error) {
   console.error("asset boot failed", error);
+  if(pageParams.get("feed")==="preview")parent.postMessage({type:"feed-preview-error"},location.origin);
   ui.loading.querySelector("strong").textContent = "素材加载失败";
   ui.progress.textContent = "请刷新重试";
   throw error;
@@ -234,6 +235,8 @@ for(const [key,element] of [['player',ui.playerName],['enemy',ui.enemyName]]){
 if(pageParams.get('feed')==='preview'){
  sound.unlock=()=>{};
  begin();game.player.energy=100;game.enemy.energy=100;
+ parent.postMessage({type:'feed-preview-ready'},location.origin);
+ const specialClip=pageParams.get('clip')==='special';
  let restartAt=0;
  setInterval(()=>{
   if(game.phase==='round_end'){
@@ -243,8 +246,9 @@ if(pageParams.get('feed')==='preview'){
   }
   const p=game.player,e=game.enemy;
   for(const action of ['p','k','sp','guard'])setButton(p,action,false);
+  if(specialClip){p.energy=100;e.energy=100;}
   const distance=Math.abs(e.x-p.x);
   setDirection(p,distance>125?Math.sign(e.x-p.x):0,0);
-  if(distance<170){const action=p.energy>=100&&Math.random()<.3?'sp':Math.random()<.65?'p':'k';setButton(p,action,true);}
+  if(distance<170){const action=specialClip?'sp':p.energy>=100&&Math.random()<.3?'sp':Math.random()<.65?'p':'k';setButton(p,action,true);}
  },340);
 }

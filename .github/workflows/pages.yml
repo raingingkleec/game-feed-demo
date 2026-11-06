@@ -44,6 +44,8 @@ jobs:
               assert (target / 'games' / fighter / 'js' / 'engine.mjs').is_file()
           if Path('promo').is_dir():
               copytree('promo', target / 'promo', dirs_exist_ok=True)
+          if Path('frontend').is_dir():
+              copytree('frontend', target, dirs_exist_ok=True)
           assert (target / 'index.html').is_file()
           (target / '.nojekyll').touch()
           PY
