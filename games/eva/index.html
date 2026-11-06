@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#171a2b">
+  <title>第三东京市·同步对决</title>
+  <link rel="stylesheet" href="css/style.css?v=1.0.3">
+</head>
+<body>
+  <main id="app">
+    <section class="game-shell" aria-label="第三东京市同步对决游戏">
+      <header class="hud" aria-live="polite">
+        <div class="fighter-hud player-hud">
+          <div class="name-row"><strong id="player-name">绫波丽</strong><span id="combo">连击 ×0</span></div>
+          <div class="health"><div id="player-lag" class="health-lag"></div><div id="player-hp" class="health-fill cat"></div></div>
+          <div class="meters"><div class="yellow"><div id="player-yellow"></div></div><div class="energy"><div id="player-energy"></div></div></div>
+        </div>
+        <div class="timer-wrap"><span id="timer">60</span><small>ROUND 1</small></div>
+        <div class="fighter-hud enemy-hud">
+          <div class="name-row"><span>AI</span><strong id="enemy-name">明日香</strong></div>
+          <div class="health"><div id="enemy-lag" class="health-lag"></div><div id="enemy-hp" class="health-fill dog"></div></div>
+          <div class="meters"><div class="yellow"><div id="enemy-yellow"></div></div><div class="energy"><div id="enemy-energy"></div></div></div>
+        </div>
+      </header>
+
+      <div class="arena-wrap">
+        <canvas id="game" width="960" height="540" aria-label="横版格斗战场"></canvas>
+        <div id="asset-loading" class="asset-loading" role="status" aria-live="polite"><strong>素材加载中</strong><span id="asset-progress">0%</span></div>
+        <div id="announce" class="announce">准备</div>
+        <button id="start" class="start-button" hidden>开始同步</button>
+        <div id="finish-cinematic" class="finish-cinematic" hidden aria-live="assertive">
+          <strong id="finish-ko" class="finish-ko">K.O.</strong>
+          <strong id="finish-winner" class="finish-winner">橘焰 WINS</strong>
+        </div>
+      </div>
+
+      <section class="controls" aria-label="触屏控制">
+        <div class="move-controls">
+          <div id="joystick" class="joystick" role="application" aria-label="八方向虚拟摇杆">
+            <i class="joy-mark up">▲</i><i class="joy-mark right">▶</i><i class="joy-mark down">▼</i><i class="joy-mark left">◀</i>
+            <div id="stick" class="stick"></div>
+          </div>
+          <div id="direction-label" class="direction-label">中立</div>
+        </div>
+        <div class="action-controls">
+          <button class="control guard" data-action="guard"><span>守</span><small>按住</small></button>
+          <button class="control p" data-action="p"><span>P</span><small>拳</small></button>
+          <button class="control k" data-action="k"><span>K</span><small>脚</small></button>
+          <button class="control sp" data-action="sp"><span>SP</span><small>特殊</small></button>
+        </div>
+      </section>
+
+      <footer class="tips"><span>守＋非下：站防　守＋下：下防　上：跳跃</span><span id="state-readout" hidden>中立</span><button id="debug-toggle" type="button" hidden>开发判定</button><span id="record">FAN TEST · 胜场 0</span></footer>
+
+    </section>
+    <aside class="rotate-hint" aria-label="横屏提示"><strong>请旋转至横屏</strong><span>横版格斗需要更宽的操作空间</span></aside>
+  </main>
+    <script type="module" src="js/app.js?v=discovery-1"></script>
+</body>
+</html>

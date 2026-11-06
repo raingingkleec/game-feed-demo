@@ -35,7 +35,7 @@ jobs:
                   z.extractall(target)
           # Tracked runtime adapters supersede the first browser-uploaded archive copies.
           for module in Path('games').rglob('*'):
-              if module.suffix not in ('.js', '.mjs'):
+              if module.suffix not in ('.js', '.mjs', '.html'):
                   continue
               destination = target / module
               destination.parent.mkdir(parents=True, exist_ok=True)
