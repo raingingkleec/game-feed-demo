@@ -46,6 +46,10 @@ jobs:
               copytree('promo', target / 'promo', dirs_exist_ok=True)
           if Path('frontend').is_dir():
               copytree('frontend', target, dirs_exist_ok=True)
+          if Path('variants').is_dir():
+              for variant in Path('variants').iterdir():
+                  if variant.is_dir():
+                      copytree(variant, target / variant.name, dirs_exist_ok=True)
           assert (target / 'index.html').is_file()
           (target / '.nojekyll').touch()
           PY

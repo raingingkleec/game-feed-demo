@@ -1,0 +1,8 @@
+{
+  "ref": "9fc0a03",
+  "title": "作品广场",
+  "purpose": "制作后统一展示与浏览推荐",
+  "sourceCommit": "9fc0a03ec6beecae85afe4130fd897177433192d",
+  "sharedGames": "../games",
+  "note": "前端独立保留，游戏运行资源共用；作品均为现有团队制作样例，尚无真实用户发布后台。"
+}

@@ -9,6 +9,13 @@
 
 https://raingingkleec.github.io/game-feed-demo/
 
+## 两种前端方向
+
+- [母体发现](https://raingingkleec.github.io/game-feed-demo/discover/)：保留第一版沉浸式前端，先刷图片，点击进入短演示，再选择母体定制。
+- [作品广场](https://raingingkleec.github.io/game-feed-demo/creations/)：保留精修版，默认自动演示，作为制作完成后的统一作品展示/推荐页样例。首个样例为漫画恶搞作品。
+
+这两个路径独立保存前端，共用游戏运行资源；根路径继续保留当前版本。现有作品均由团队制作；尚未接通真实 UGC 发布、审核、账号与存储后端。
+
 ## 部署
 
 为了使用浏览器上传并保留目录结构，运行资源以五个独立 ZIP 分包存放，每个包小于25MB。分包中是完整的 HTML/CSS/JavaScript 与美术资源，并不是安装包。
